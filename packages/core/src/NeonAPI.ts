@@ -20,7 +20,7 @@ export class NeonAPI {
       routes = [...routes, ...router.getRoutes()]
     })
     formatRoutes(routes).forEach((val) => {
-      this._logger.log(`\t${methodColor(val.method.padEnd(8, " "))} ${val.path.underline.blue} Fn -> ${val.fn.magenta}`)
+      this._logger.log(`\t${val}`)
     })
     this._server = new NeonHTTPServer(port, routes)
 

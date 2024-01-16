@@ -1,5 +1,7 @@
 import {Route} from "./NeonController";
 import colors from "colors";
+import NeonRequest, {HTTPMethod} from "./http/NeonRequest";
+import {json, ResponseFormatterFunction} from "./http/NeonResponse";
 
 function normalize(strArray: string[]) {
   const resultArray = [];
@@ -66,6 +68,10 @@ type RoutePrint = {
   fn: string
 }
 
+export function formatRoute(route: Route) {
+  return formatRoutes([route])[0]
+}
+
 export function formatRoutes(routes: Route[]) {
   let out: RoutePrint[] = []
   let longestPath = 0
@@ -74,13 +80,13 @@ export function formatRoutes(routes: Route[]) {
     out.push({
       method: route.method.toUpperCase(),
       path: route.path,
-      fn: route.func.name
+      fn: [Reflect.get(route.func, "className"), route.func.name].join("."),
     })
   })
   out.forEach((val) => {
     val.path = val.path.padEnd(longestPath, " ")
   })
-  return out
+  return out.map((val) => formatNativeRequest(val.method as HTTPMethod, val.path, val.fn))
 }
 
 const MethodColors: Record<string, colors.Color> = {
@@ -91,6 +97,14 @@ const MethodColors: Record<string, colors.Color> = {
 
 export function methodColor(method: string) {
   return MethodColors[method.toLowerCase().trim()](method)
+}
+
+export function formatRequest(req: NeonRequest, route?: Route) {
+  return formatNativeRequest(req.getMethod(), req.getPath(), route ? [Reflect.get(route.func, "className"), route.func.name].join(".") : undefined)
+}
+
+export function formatNativeRequest(method: HTTPMethod, path: string, fn?: string) {
+  return `${methodColor(method.padEnd(8, " "))} ${path.underline.blue}${fn ? ` Fn -> ${fn.magenta}` : ""}`
 }
 
 export function splitPath(path: string) {
@@ -123,4 +137,14 @@ export function getPathParams(routePath: string, reqPath: string) {
   })
 
   return out
+}
+
+export type ResponseData = ResponseFormatterFunction | object
+
+export function getFunctionFromResponse(funcOrObj: ResponseData) {
+  if (typeof funcOrObj === "function") {
+    return funcOrObj
+  } else {
+   return json(funcOrObj)
+  }
 }

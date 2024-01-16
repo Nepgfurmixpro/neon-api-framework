@@ -1,6 +1,7 @@
-import {HTTPMethod} from "../http/NeonRequest";
+import NeonRequest, {HTTPMethod} from "../http/NeonRequest";
+import {ResponseData} from "../utils";
 
-export type MethodFunction = (req: string, ...args: any[]) => Promise<any>
+export type MethodFunction = (req: NeonRequest, ...args: any[]) => Promise<ResponseData>
 
 export type RouteData = {
   method: HTTPMethod,
@@ -13,6 +14,7 @@ function MethodDecorator(url: string, method: HTTPMethod) {
       method,
       url
     } as RouteData)
+    Reflect.set(descriptor.value, "className", targetPrototype.constructor.name)
   }
 }
 

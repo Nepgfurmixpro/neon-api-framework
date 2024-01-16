@@ -3,7 +3,8 @@ import ts from "typescript";
 
 const LogLevel: Record<string, (str: string) => string> = {
   Error: (str: string) => colors.bgRed(colors.black(str)),
-  Info: (str: string) => colors.green(str)
+  Info: (str: string) => colors.green(str),
+  Debug: (str: string) => colors.magenta(str)
 }
 
 export default class Logger {
@@ -12,7 +13,11 @@ export default class Logger {
   }
 
   private _print(level: string, ...args: any[]) {
-    console.log(`[${new Date().toUTCString()}] ${LogLevel[level](`[${this._name} / ${level}]`)} ->`, ...args)
+    console.log(`[${new Date().toLocaleString(Intl.DateTimeFormat().resolvedOptions().locale, {
+      hour12: false,
+      dateStyle: "medium",
+      timeStyle: "long"
+    })}] ${LogLevel[level](`[${this._name} / ${level}]`)} ->`, ...args)
   }
 
   log(...args: string[]) {
@@ -21,6 +26,10 @@ export default class Logger {
 
   error(...args: any[]) {
     this._print("Error", ...args)
+  }
+
+  debug(...args: any[]) {
+    this._print("Debug", ...args)
   }
 
   private readonly _name: string

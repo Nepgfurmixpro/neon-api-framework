@@ -3,6 +3,9 @@ import {Controller} from "./decorators/controller";
 import NeonController from "./NeonController";
 import {Post, Get, Json} from "./decorators/methods";
 import {Body, Path} from "./decorators/params";
+import NeonRequest from "./http/NeonRequest";
+import {html, json, url} from "./http/NeonResponse";
+import ResponseError from "./errors/ResponseError";
 
 type CreateUserReq = {
   email: string
@@ -10,23 +13,32 @@ type CreateUserReq = {
 
 @Controller("/users")
 class Users extends NeonController {
-  @Post("/<id>/<name>")
+  @Get("/<id>/<name>")
   @Json()
   async CreateUser(
-    req: string,
+    req: NeonRequest,
     @Path("id") id: string,
-    @Path("name") name: string,
-    @Body body: CreateUserReq) {
+    @Path("name") name: string) {
 
+    if (id != "1") {
+      throw new ResponseError(400, {
+        message: "ID must be 1",
+        code: 1000
+      })
+    }
+
+    return {
+      name, id
+    }
   }
 
   @Get("/@me")
-  async GetUser(req: string) {
+  async GetUser(req: NeonRequest) {
 
   }
 
   @Get()
-  async GetAllUsers(req: string) {
+  async GetAllUsers(req: NeonRequest) {
 
   }
 }
