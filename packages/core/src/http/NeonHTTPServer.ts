@@ -5,7 +5,7 @@ import { v4 as createUUID } from "uuid"
 import {
   formatNativeRequest,
   formatRequest,
-  formatRoute,
+  formatRoute, formatRouteNoColor,
   formatRoutes, getFunctionFromResponse,
   getPathParams,
   PATH_PARAM_REGEX,
@@ -14,19 +14,25 @@ import {
 import Logger from "../logger";
 import * as path from "path";
 import NeonResponse, {json} from "./NeonResponse";
-import ResponseError from "../errors/ResponseError";
+import StatusResponse from "./StatusResponse";
+import HTTPErrorHandlers from "./HTTPErrorHandlers";
+import {NeonAPI} from "../NeonAPI";
 
 interface EventMap {
   'ready': () => void,
-  'error': (code: number, request: NeonRequest, response: NeonResponse) => void
+  'error': (request: NeonRequest, response: NeonResponse, err: any) => void,
+  'notFound': (request: NeonRequest, response: NeonResponse) => void
 }
 
 export default class NeonHTTPServer {
-  constructor(port: number, routes: Route[]) {
+  constructor(port: number, routes: Route[], api: NeonAPI) {
+    this._api = api;
     this._routes = routes
     this._port = port
     this._logger = Logger.get("HTTP")
     this._requestLogger = Logger.get("HTTP Request")
+
+    this._httpErrorHandlers = new HTTPErrorHandlers()
     this._httpServer = http.createServer((req, res) => {
       let time = performance.now()
       this.processRequest(req, res)
@@ -34,6 +40,25 @@ export default class NeonHTTPServer {
       this._logger.debug(`Response Took: ${resTime < 100 ? `${resTime}ms`.green : `${resTime}ms`.red}`)
     }).on("listening", () => {
       this.Emit("ready")
+    })
+
+    const sendErrorData = (response: NeonResponse, data: any) => {
+      response.send(data).catch((err) => {
+        this._logger.error("Failed to send error response.")
+        this._logger.error(err)
+      })
+    }
+
+    this.On("error", (request, response, err) => {
+      const res = this._httpErrorHandlers.Error(request, err)
+      response.setStatus(res.status)
+      sendErrorData(response, getFunctionFromResponse(res.data)(response))
+    })
+
+    this.On("notFound", (request, response) => {
+      const res = this._httpErrorHandlers.NotFound(request)
+      response.setStatus(404)
+      sendErrorData(response, getFunctionFromResponse(res)(response))
     })
   }
 
@@ -81,36 +106,53 @@ export default class NeonHTTPServer {
     }
     try {
       route.func.apply(this, [request, ...args]).then((funcOrObj) => {
-        response.setStatus(200)
-        sendData(getFunctionFromResponse(funcOrObj)(response))
-      }).catch((err: ResponseError | any) => {
-        if (err instanceof ResponseError) {
+        if (funcOrObj) {
+          response.setStatus(200)
+          sendData(getFunctionFromResponse(funcOrObj)(response))
+        } else {
+          this._requestLogger.warn(`Route ${formatRoute(route)} returned undefined.`)
+          this.Emit("error", request, response, `Route "${formatRouteNoColor(route)}" returned undefined.`)
+        }
+      }).catch((err: StatusResponse | any) => {
+        if (err instanceof StatusResponse) {
           let data = getFunctionFromResponse(err.data)(response)
           response.setStatus(err.status)
           sendData(data)
         } else {
-          this.Emit("error", 500, request, response)
+          this.Emit("error", request, response, err)
         }
       })
     } catch (e) {
-      this._logger
-      this.Emit("error", 500, request, response)
+      if (e instanceof TypeError) {
+        this._requestLogger.error("TypeError emitted when calling route function.")
+        this._requestLogger.error(e)
+        this.Emit("error", request, response, "Internal Server Failure")
+      } else {
+        this.Emit("error", request, response, e)
+      }
     }
   }
 
   private processRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+    const caseSensitiveUrls = this._api.GetOption("CaseSensitive")
     const path = new URL(req.url ?? "/", LOCAL_HOST).pathname
-    const reqPathSplit = splitPath(path)
+    const reqPathSplit = splitPath(path, caseSensitiveUrls)
     let moreLikely = this._routes.filter((route) => {
       if (route.method.toUpperCase() != (req.method ?? "").toUpperCase()) return false
       if (splitPath(route.path).length != reqPathSplit.length) return false;
       return true
     })
     moreLikely = moreLikely.filter((route) => {
-      return splitPath(route.path)
+      return splitPath(route.path, caseSensitiveUrls)
         .every((val, i) =>
           val == reqPathSplit[i] || PATH_PARAM_REGEX.test(val))
     })
+    if (moreLikely.length > 1) {
+      moreLikely = moreLikely.filter((route) => {
+        return splitPath(route.path, caseSensitiveUrls)
+          .every((val, i) => val == reqPathSplit[i])
+      })
+    }
     const request = new NeonRequest({
       method: req.method!.toUpperCase() as HTTPMethod,
       headers: req.headers as Record<string, string>,
@@ -121,11 +163,15 @@ export default class NeonHTTPServer {
     if (moreLikely.length == 1) {
       const route = moreLikely[0]
       this.dispatchRequest(route, request, new NeonResponse(res))
-    } else if (moreLikely.length > 1) {
-
     } else {
+      if (moreLikely.length > 1) {
+        this._requestLogger.warn("Multiple routes found")
+        formatRoutes(moreLikely).forEach((format) => {
+          this._requestLogger.warn(`\t${format}`)
+        })
+      }
       this._requestLogger.error(`${"404".red} ${formatNativeRequest(req.method!.toUpperCase() as HTTPMethod, path)}`)
-      this.Emit("error", 404, request, new NeonResponse(res))
+      this.Emit("notFound", request, new NeonResponse(res))
     }
   }
 
@@ -138,6 +184,8 @@ export default class NeonHTTPServer {
   private readonly _port: number
   private readonly _logger: Logger
   private readonly _requestLogger: Logger
+  private readonly _api: NeonAPI
+  private _httpErrorHandlers: HTTPErrorHandlers
   private _eventListeners: {
     uuid: string,
     name: string,

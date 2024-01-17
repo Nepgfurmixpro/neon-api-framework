@@ -4,7 +4,8 @@ import ts from "typescript";
 const LogLevel: Record<string, (str: string) => string> = {
   Error: (str: string) => colors.bgRed(colors.black(str)),
   Info: (str: string) => colors.green(str),
-  Debug: (str: string) => colors.magenta(str)
+  Debug: (str: string) => colors.magenta(str),
+  Warn: (str: string) => colors.bgYellow.black(str)
 }
 
 export default class Logger {
@@ -30,6 +31,10 @@ export default class Logger {
 
   debug(...args: any[]) {
     this._print("Debug", ...args)
+  }
+
+  warn(...args: any[]) {
+    this._print("Warn", ...args)
   }
 
   private readonly _name: string

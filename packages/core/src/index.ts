@@ -5,7 +5,7 @@ import {Post, Get, Json} from "./decorators/methods";
 import {Body, Path} from "./decorators/params";
 import NeonRequest from "./http/NeonRequest";
 import {html, json, url} from "./http/NeonResponse";
-import ResponseError from "./errors/ResponseError";
+import StatusResponse from "./http/StatusResponse";
 
 type CreateUserReq = {
   email: string
@@ -21,7 +21,7 @@ class Users extends NeonController {
     @Path("name") name: string) {
 
     if (id != "1") {
-      throw new ResponseError(400, {
+      throw new StatusResponse(400, {
         message: "ID must be 1",
         code: 1000
       })
@@ -32,9 +32,12 @@ class Users extends NeonController {
     }
   }
 
-  @Get("/@me")
+  @Get("/test/shouldBePickedFirst")
   async GetUser(req: NeonRequest) {
-
+    return {
+      name: "Gavin",
+      gay: true
+    }
   }
 
   @Get()
@@ -43,17 +46,8 @@ class Users extends NeonController {
   }
 }
 
-@Controller("/saves")
-class Saves extends NeonController {
-  @Get("recent/<user>")
-  GetRecentSave() {
-
-  }
-}
-
 NeonFramework.AddRoutes("/api/v1", [
-  Users,
-  Saves
+  Users
 ])
 
 NeonFramework.Listen()

@@ -1,6 +1,6 @@
 import {ResponseData} from "../utils";
 
-export default class ResponseError {
+export default class StatusResponse {
   constructor(status: number, data: ResponseData) {
     this.status = status
     this.data = data
