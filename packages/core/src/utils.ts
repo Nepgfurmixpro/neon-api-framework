@@ -72,7 +72,11 @@ export function formatRoute(route: Route) {
   return formatRoutes([route])[0]
 }
 
-export function formatRoutes(routes: Route[]) {
+export function formatRouteNoColor(route: Route) {
+  return formatRoutes([route], false)[0]
+}
+
+export function formatRoutes(routes: Route[], color: boolean = true) {
   let out: RoutePrint[] = []
   let longestPath = 0
   routes.forEach((route) => {
@@ -86,7 +90,7 @@ export function formatRoutes(routes: Route[]) {
   out.forEach((val) => {
     val.path = val.path.padEnd(longestPath, " ")
   })
-  return out.map((val) => formatNativeRequest(val.method as HTTPMethod, val.path, val.fn))
+  return out.map((val) => color ? formatNativeRequest(val.method as HTTPMethod, val.path, val.fn) : formatNativeRequestNoColor(val.method as HTTPMethod, val.path, val.fn))
 }
 
 const MethodColors: Record<string, colors.Color> = {
@@ -107,10 +111,13 @@ export function formatNativeRequest(method: HTTPMethod, path: string, fn?: strin
   return `${methodColor(method.padEnd(8, " "))} ${path.underline.blue}${fn ? ` Fn -> ${fn.magenta}` : ""}`
 }
 
-export function splitPath(path: string) {
-  const split = path.split("/")
-  split.shift()
-  return split
+export function formatNativeRequestNoColor(method: HTTPMethod, path: string, fn?: string) {
+  return `${method.padEnd(8, " ")} ${path}${fn ? ` Fn -> ${fn}` : ""}`
+}
+
+export function splitPath(path: string, caseSensitive: boolean = false) {
+  const split = path.split("/").filter((val) => val != "")
+  return split.map((val) => !caseSensitive ? val.toLowerCase() : val)
 }
 
 export const PATH_PARAM_REGEX = /<.*>/
@@ -123,8 +130,8 @@ export type PathParam = {
 export function getPathParams(routePath: string, reqPath: string) {
   let out: PathParam[] = []
 
-  const routePathSplit = splitPath(routePath)
-  const reqPathSplit = splitPath(reqPath)
+  const routePathSplit = splitPath(routePath, true)
+  const reqPathSplit = splitPath(reqPath, true)
 
   routePathSplit.forEach((val, i) => {
     if (PATH_PARAM_REGEX.test(val)) {

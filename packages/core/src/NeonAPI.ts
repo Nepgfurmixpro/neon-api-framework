@@ -6,11 +6,27 @@ import NeonHTTPServer from "./http/NeonHTTPServer";
 
 const DEFAULT_PORT = 3000
 
+interface APIOptions {
+  "CaseSensitive": boolean
+}
+
 export class NeonAPI {
   private _logger: Logger
   constructor() {
     this._logger = Logger.get("NeonFramework")
     this._routers = [];
+
+    this._apiOptions = {
+      CaseSensitive: false
+    }
+  }
+
+  SetOption<K extends keyof APIOptions>(name: K, value: APIOptions[K]) {
+    this._apiOptions[name] = value
+  }
+
+  GetOption<K extends keyof APIOptions>(name: K): APIOptions[K] {
+    return this._apiOptions[name]
   }
 
   Listen(port: number = DEFAULT_PORT) {
@@ -22,7 +38,7 @@ export class NeonAPI {
     formatRoutes(routes).forEach((val) => {
       this._logger.log(`\t${val}`)
     })
-    this._server = new NeonHTTPServer(port, routes)
+    this._server = new NeonHTTPServer(port, routes, this)
 
     this._server.On("ready", () => {
       this._logger.log(`Started on http://0.0.0.0:${port}`)
@@ -50,6 +66,7 @@ export class NeonAPI {
   }
 
   private _routers: NeonRouter[];
+  private _apiOptions: Record<keyof APIOptions, APIOptions[keyof APIOptions]>
   private _server: NeonHTTPServer | undefined;
 }
 
