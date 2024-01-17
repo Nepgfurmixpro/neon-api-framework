@@ -4,7 +4,6 @@ import NeonController from "./NeonController";
 import {Post, Get, Json} from "./decorators/methods";
 import {Body, Path} from "./decorators/params";
 import NeonRequest from "./http/NeonRequest";
-import {html, json, url} from "./http/NeonResponse";
 import ResponseError from "./errors/ResponseError";
 
 type CreateUserReq = {
