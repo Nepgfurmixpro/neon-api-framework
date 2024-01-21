@@ -3,6 +3,9 @@ import {NeonRouter, createRouter, NeonRouteType, RouterRoutes} from "./NeonRoute
 import {Logger} from "./logger";
 import {formatRoutes} from "./utils";
 import {NeonHTTPServer} from "./http/NeonHTTPServer";
+import {NeonRequest} from "./http/NeonRequest";
+import stream from "stream"
+import {HTTPErrorHandler} from "./http/HTTPErrorHandler";
 
 const DEFAULT_PORT = 3000
 
@@ -10,7 +13,11 @@ interface APIOptions {
   "CaseSensitive": boolean
 }
 
-type BodyParserFunction = (body: string, request: NeonRequest) => any
+export type BodyParserFunction = (stream: stream.Readable, request: NeonRequest) => Promise<any>
+export type ContentTypeBuilder = () => {
+  bodyType: string,
+  func: BodyParserFunction
+}
 
 export class NeonAPI {
   private _logger: Logger
@@ -68,18 +75,30 @@ export class NeonAPI {
     return this._routers
   }
 
-  RegisterBodyParser(bodyType: string, cb: BodyParserFunction) {
-    this._bodyParsers[bodyType] = cb
+  RegisterContentTypes(...builders: ContentTypeBuilder[]) {
+    for (const builder of builders) {
+      const { bodyType, func } = builder()
+      this._bodyParsers[bodyType] = func
+    }
   }
 
   GetBodyParser(bodyType: string): BodyParserFunction | undefined {
     return this._bodyParsers[bodyType]
   }
 
+  SetHTTPErrorHandler(handler: HTTPErrorHandler) {
+    this._httpErrorHandler = handler
+  }
+
+  GetHTTPErrorHandler() {
+    return this._httpErrorHandler ?? new HTTPErrorHandler();
+  }
+
   private _routers: NeonRouter[];
   private _apiOptions: Record<keyof APIOptions, APIOptions[keyof APIOptions]>
   private _bodyParsers: Record<string, BodyParserFunction>
   private _server: NeonHTTPServer | undefined;
+  private _httpErrorHandler: HTTPErrorHandler | undefined
 }
 
 export const NeonFramework = new NeonAPI();
