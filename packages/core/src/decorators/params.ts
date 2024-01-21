@@ -1,4 +1,4 @@
-import NeonController, {RouteParam} from "../NeonController";
+import {NeonController, RouteParam} from "../NeonController";
 import {MethodFunction} from "./methods";
 import "reflect-metadata";
 

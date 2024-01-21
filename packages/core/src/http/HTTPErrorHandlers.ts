@@ -1,8 +1,8 @@
-import NeonRequest from "./NeonRequest";
+import {NeonRequest} from "./NeonRequest";
 import {ResponseData} from "../utils";
-import StatusResponse from "./StatusResponse";
+import {StatusResponse} from "./StatusResponse";
 
-export default class HTTPErrorHandlers {
+export class HTTPErrorHandlers {
   Error(req: NeonRequest, err: any): StatusResponse {
     return new StatusResponse(500, {
       message: "500: Internal Server Error",

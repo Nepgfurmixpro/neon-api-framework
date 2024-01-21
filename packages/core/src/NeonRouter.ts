@@ -1,10 +1,10 @@
-import NeonController, {Route} from "./NeonController";
+import { NeonController, Route} from "./NeonController";
 import { urlJoin } from "./utils";
 
 type NeonRouteType = typeof NeonController | NeonRouter
 
 type RouterRoutes = Record<string, (NeonRouteType[] | NeonRouteType)> | NeonRouteType[]
-export default class NeonRouter {
+export class NeonRouter {
   constructor(routes: RouterRoutes) {
     this._routes = []
     this._routerRoutes = routes

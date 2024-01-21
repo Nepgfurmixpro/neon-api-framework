@@ -1,7 +1,4 @@
-import * as ts from "typescript";
 import {MethodFunction} from "./decorators/methods";
-import {Controller} from "./decorators/controller";
-import {posix} from "path"
 import { urlJoin } from "./utils";
 import {HTTPMethod} from "./http/NeonRequest";
 
@@ -19,7 +16,7 @@ export type Route = {
   bodyType?: string
 }
 
-export default class NeonController {
+export class NeonController {
   constructor() {
     this._routes = []
     this._basePath = Reflect.get(

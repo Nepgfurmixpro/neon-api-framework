@@ -18,8 +18,8 @@ export type {
 // since i cant just use new URL without a stupid host
 export const LOCAL_HOST = "http://localhost"
 
-export default class NeonRequest {
-  constructor({ headers, method, host, ip, path, body }: NeonRequestData) {
+export class NeonRequest {
+  constructor({ headers, method, host, ip, path }: NeonRequestData) {
     this._headers = headers
     this._method = method
     this._host = host

@@ -1,6 +1,6 @@
 import {Route} from "../NeonController";
-import NeonRequest, {HTTPMethod, LOCAL_HOST} from "./NeonRequest";
-import * as http from "http";
+import {NeonRequest, HTTPMethod, LOCAL_HOST} from "./NeonRequest";
+import * as http from "node:http";
 import { v4 as createUUID } from "uuid"
 import {
   formatNativeRequest,
@@ -11,11 +11,10 @@ import {
   PATH_PARAM_REGEX,
   splitPath
 } from "../utils";
-import Logger from "../logger";
-import * as path from "path";
-import NeonResponse, {json} from "./NeonResponse";
-import StatusResponse from "./StatusResponse";
-import HTTPErrorHandlers from "./HTTPErrorHandlers";
+import {Logger} from "../logger";
+import {NeonResponse} from "./NeonResponse";
+import {StatusResponse} from "./StatusResponse";
+import {HTTPErrorHandlers} from "./HTTPErrorHandlers";
 import {NeonAPI} from "../NeonAPI";
 
 interface EventMap {
@@ -24,7 +23,7 @@ interface EventMap {
   'notFound': (request: NeonRequest, response: NeonResponse) => void
 }
 
-export default class NeonHTTPServer {
+export class NeonHTTPServer {
   constructor(port: number, routes: Route[], api: NeonAPI) {
     this._api = api;
     this._routes = routes

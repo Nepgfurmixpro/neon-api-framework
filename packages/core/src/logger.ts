@@ -1,5 +1,4 @@
 import colors from "colors"
-import ts from "typescript";
 
 const LogLevel: Record<string, (str: string) => string> = {
   Error: (str: string) => colors.bgRed(colors.black(str)),
@@ -8,7 +7,7 @@ const LogLevel: Record<string, (str: string) => string> = {
   Warn: (str: string) => colors.bgYellow.black(str)
 }
 
-export default class Logger {
+export class Logger {
   protected constructor(name: string) {
     this._name = name
   }
