@@ -19,12 +19,13 @@ export type {
 export const LOCAL_HOST = "http://localhost"
 
 export default class NeonRequest {
-  constructor({ headers, method, host, ip, path }: NeonRequestData) {
+  constructor({ headers, method, host, ip, path, body }: NeonRequestData) {
     this._headers = headers
     this._method = method
     this._host = host
     this._ip = ip
     this._path = new URL(path, LOCAL_HOST).pathname
+    this._body = body
   }
 
   getPath(): string {
@@ -35,9 +36,14 @@ export default class NeonRequest {
     return this._method
   }
 
+  getBody(): ArrayBuffer {
+
+  }
+
   private _headers: NeonHeaders
   private _method: HTTPMethod
   private _host: string
   private _ip: string
   private _path: string
+  private _body: string
 }

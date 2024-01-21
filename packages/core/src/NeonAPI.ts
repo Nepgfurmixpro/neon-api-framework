@@ -3,6 +3,7 @@ import NeonRouter, {createRouter, NeonRouteType, RouterRoutes} from "./NeonRoute
 import Logger from "./logger";
 import {formatRoutes, methodColor} from "./utils";
 import NeonHTTPServer from "./http/NeonHTTPServer";
+import NeonRequest from "./http/NeonRequest";
 
 const DEFAULT_PORT = 3000
 
@@ -10,11 +11,14 @@ interface APIOptions {
   "CaseSensitive": boolean
 }
 
+type BodyParserFunction = (body: string, request: NeonRequest) => any
+
 export class NeonAPI {
   private _logger: Logger
   constructor() {
     this._logger = Logger.get("NeonFramework")
     this._routers = [];
+    this._bodyParsers = {}
 
     this._apiOptions = {
       CaseSensitive: false
@@ -65,8 +69,17 @@ export class NeonAPI {
     return this._routers
   }
 
+  RegisterBodyParser(bodyType: string, cb: BodyParserFunction) {
+    this._bodyParsers[bodyType] = cb
+  }
+
+  GetBodyParser(bodyType: string): BodyParserFunction | undefined {
+    return this._bodyParsers[bodyType]
+  }
+
   private _routers: NeonRouter[];
   private _apiOptions: Record<keyof APIOptions, APIOptions[keyof APIOptions]>
+  private _bodyParsers: Record<string, BodyParserFunction>
   private _server: NeonHTTPServer | undefined;
 }
 

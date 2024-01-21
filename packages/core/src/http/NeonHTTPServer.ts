@@ -89,10 +89,27 @@ export default class NeonHTTPServer {
   private dispatchRequest(route: Route, request: NeonRequest, response: NeonResponse) {
     const pathParams = getPathParams(route.path, request.getPath())
     let args: any[] = new Array(pathParams.length)
+    let canHaveBody = false
+    const method = request.getMethod()
+    if (method == "POST" || method == "PUT" || method == "PATCH") {
+      canHaveBody = true
+    }
     route.parameters.forEach((param) => {
-      if (param.type == "path") {
-        args[param.index-1] = decodeURI(pathParams
-          .find((val) => val.name == param.name)?.value ?? "")
+      switch (param.type) {
+        case "path": {
+          args[param.index-1] = decodeURI(pathParams
+            .find((val) => val.name == param.name)?.value ?? "")
+          break
+        }
+        case "body": {
+          if (canHaveBody) {
+            const parser = this._api.GetBodyParser(route.bodyType ?? "")
+            if (parser) {
+              args[param.index-1] = parser(request.getBody(), request)
+            }
+          }
+          break;
+        }
       }
     })
     this._requestLogger.log(`${formatRequest(request, route)}`)
@@ -141,6 +158,9 @@ export default class NeonHTTPServer {
       if (route.method.toUpperCase() != (req.method ?? "").toUpperCase()) return false
       if (splitPath(route.path).length != reqPathSplit.length) return false;
       return true
+    })
+    req.on("data", (data) => {
+      console.log(data)
     })
     moreLikely = moreLikely.filter((route) => {
       return splitPath(route.path, caseSensitiveUrls)
