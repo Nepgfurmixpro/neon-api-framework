@@ -28,7 +28,7 @@ export function html(data: string): ResponseFormatterFunction {
   }
 }
 
-export default class NeonResponse {
+export class NeonResponse {
   constructor(res: http.ServerResponse) {
     this._res = res;
   }

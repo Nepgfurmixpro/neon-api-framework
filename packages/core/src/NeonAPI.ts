@@ -1,8 +1,8 @@
-import NeonController, {Route} from "./NeonController";
-import NeonRouter, {createRouter, NeonRouteType, RouterRoutes} from "./NeonRouter";
-import Logger from "./logger";
-import {formatRoutes, methodColor} from "./utils";
-import NeonHTTPServer from "./http/NeonHTTPServer";
+import {Route} from "./NeonController";
+import {NeonRouter, createRouter, NeonRouteType, RouterRoutes} from "./NeonRouter";
+import {Logger} from "./logger";
+import {formatRoutes} from "./utils";
+import {NeonHTTPServer} from "./http/NeonHTTPServer";
 
 const DEFAULT_PORT = 3000
 

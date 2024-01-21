@@ -7,6 +7,7 @@
     "packages": "packages"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples"
   ]
 }

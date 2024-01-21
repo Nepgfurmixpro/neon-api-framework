@@ -1,4 +1,4 @@
-import NeonRequest, {HTTPMethod} from "../http/NeonRequest";
+import {NeonRequest, HTTPMethod} from "../http/NeonRequest";
 import {ResponseData} from "../utils";
 
 export type MethodFunction = (req: NeonRequest, ...args: any[]) => Promise<ResponseData>
