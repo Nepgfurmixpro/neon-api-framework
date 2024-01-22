@@ -1,4 +1,4 @@
-import {NeonRequest, HTTPMethod} from "../http/NeonRequest";
+import {HTTPMethod, NeonRequest} from "../http/NeonRequest";
 import {ResponseData} from "../utils";
 
 export type MethodFunction = (req: NeonRequest, ...args: any[]) => Promise<ResponseData>
@@ -24,14 +24,4 @@ export function Post(url: string = "") {
 
 export function Get(url: string = "") {
   return MethodDecorator(url, "GET")
-}
-
-export function BodyType(type: string) {
-  return (targetPrototype: any, prototypeKey: string, descriptor: PropertyDescriptor) => {
-    Reflect.set(descriptor.value, "bodyType", type)
-  }
-}
-
-export function Json() {
-  return BodyType("application/json")
 }

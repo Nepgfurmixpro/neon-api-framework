@@ -14,7 +14,7 @@ import {
 import {Logger} from "../logger";
 import {NeonResponse} from "./NeonResponse";
 import {StatusResponse} from "./StatusResponse";
-import {HTTPErrorHandlers} from "./HTTPErrorHandlers";
+import {HTTPErrorHandler} from "./HTTPErrorHandler";
 import {NeonAPI} from "../NeonAPI";
 
 interface EventMap {
@@ -31,7 +31,7 @@ export class NeonHTTPServer {
     this._logger = Logger.get("HTTP")
     this._requestLogger = Logger.get("HTTP Request")
 
-    this._httpErrorHandlers = new HTTPErrorHandlers()
+    this._httpErrorHandler = api.GetHTTPErrorHandler()
     this._httpServer = http.createServer((req, res) => {
       let time = performance.now()
       this.processRequest(req, res)
@@ -49,13 +49,13 @@ export class NeonHTTPServer {
     }
 
     this.On("error", (request, response, err) => {
-      const res = this._httpErrorHandlers.Error(request, err)
+      const res = this._httpErrorHandler.Error(request, err)
       response.setStatus(res.status)
       sendErrorData(response, getFunctionFromResponse(res.data)(response))
     })
 
     this.On("notFound", (request, response) => {
-      const res = this._httpErrorHandlers.NotFound(request)
+      const res = this._httpErrorHandler.NotFound(request)
       response.setStatus(404)
       sendErrorData(response, getFunctionFromResponse(res)(response))
     })
@@ -85,13 +85,34 @@ export class NeonHTTPServer {
     })
   }
 
-  private dispatchRequest(route: Route, request: NeonRequest, response: NeonResponse) {
+  private async dispatchRequest(route: Route, request: NeonRequest, response: NeonResponse) {
     const pathParams = getPathParams(route.path, request.getPath())
     let args: any[] = new Array(pathParams.length)
+    let canHaveBody = false
+    const method = request.getMethod()
+    let body: any
+    if (method == "POST" || method == "PUT" || method == "PATCH") {
+      canHaveBody = true
+      const parser = this._api.GetBodyParser(route.bodyType ?? "")
+      if (parser) {
+        body = await parser(request.getStream(), request)
+      } else {
+        this._logger.warn(`HTTP Content Type body parser for "${route.bodyType}" not registered.`)
+      }
+    }
     route.parameters.forEach((param) => {
-      if (param.type == "path") {
-        args[param.index-1] = decodeURI(pathParams
-          .find((val) => val.name == param.name)?.value ?? "")
+      switch (param.type) {
+        case "path": {
+          args[param.index-1] = decodeURI(pathParams
+            .find((val) => val.name == param.name)?.value ?? "")
+          break
+        }
+        case "body": {
+          if (canHaveBody) {
+            args[param.index-1] = body
+          }
+          break;
+        }
       }
     })
     this._requestLogger.log(`${formatRequest(request, route)}`)
@@ -138,8 +159,7 @@ export class NeonHTTPServer {
     const reqPathSplit = splitPath(path, caseSensitiveUrls)
     let moreLikely = this._routes.filter((route) => {
       if (route.method.toUpperCase() != (req.method ?? "").toUpperCase()) return false
-      if (splitPath(route.path).length != reqPathSplit.length) return false;
-      return true
+      return splitPath(route.path).length == reqPathSplit.length;
     })
     moreLikely = moreLikely.filter((route) => {
       return splitPath(route.path, caseSensitiveUrls)
@@ -158,6 +178,7 @@ export class NeonHTTPServer {
       host: req.headers.host ?? "",
       path: path,
       ip: req.socket.remoteAddress ?? "",
+      raw: req
     })
     if (moreLikely.length == 1) {
       const route = moreLikely[0]
@@ -184,7 +205,7 @@ export class NeonHTTPServer {
   private readonly _logger: Logger
   private readonly _requestLogger: Logger
   private readonly _api: NeonAPI
-  private _httpErrorHandlers: HTTPErrorHandlers
+  private _httpErrorHandler: HTTPErrorHandler
   private _eventListeners: {
     uuid: string,
     name: string,
