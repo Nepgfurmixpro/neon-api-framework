@@ -1,0 +1,1 @@
+{"version":3,"file":"StatusResponse.js","sourceRoot":"","sources":["../../src/http/StatusResponse.ts"],"names":[],"mappings":";;;AAEA,MAAa,cAAc;IACzB,YAAY,MAAc,EAAE,IAAkB;QAC5C,IAAI,CAAC,MAAM,GAAG,MAAM,CAAA;QACpB,IAAI,CAAC,IAAI,GAAG,IAAI,CAAA;IAClB,CAAC;CAIF;AARD,wCAQC"}
