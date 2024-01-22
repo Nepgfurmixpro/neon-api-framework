@@ -5,11 +5,13 @@ const NeonRouter_1 = require("./NeonRouter");
 const logger_1 = require("./logger");
 const utils_1 = require("./utils");
 const NeonHTTPServer_1 = require("./http/NeonHTTPServer");
+const HTTPErrorHandler_1 = require("./http/HTTPErrorHandler");
 const DEFAULT_PORT = 3000;
 class NeonAPI {
     constructor() {
         this._logger = logger_1.Logger.get("NeonFramework");
         this._routers = [];
+        this._bodyParsers = {};
         this._apiOptions = {
             CaseSensitive: false
         };
@@ -48,6 +50,22 @@ class NeonAPI {
     }
     GetRouters() {
         return this._routers;
+    }
+    RegisterContentTypes(...builders) {
+        for (const builder of builders) {
+            const { bodyType, func } = builder();
+            this._bodyParsers[bodyType] = func;
+        }
+    }
+    GetBodyParser(bodyType) {
+        return this._bodyParsers[bodyType];
+    }
+    SetHTTPErrorHandler(handler) {
+        this._httpErrorHandler = handler;
+    }
+    GetHTTPErrorHandler() {
+        var _a;
+        return (_a = this._httpErrorHandler) !== null && _a !== void 0 ? _a : new HTTPErrorHandler_1.HTTPErrorHandler();
     }
 }
 exports.NeonAPI = NeonAPI;

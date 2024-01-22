@@ -22,7 +22,7 @@ export declare class NeonHTTPServer {
     private readonly _logger;
     private readonly _requestLogger;
     private readonly _api;
-    private _httpErrorHandlers;
+    private _httpErrorHandler;
     private _eventListeners;
 }
 export {};

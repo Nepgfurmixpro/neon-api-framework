@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Json = exports.BodyType = exports.Get = exports.Post = void 0;
+exports.Get = exports.Post = void 0;
 function MethodDecorator(url, method) {
     return (targetPrototype, prototypeKey, descriptor) => {
         Reflect.set(descriptor.value, "route", {
@@ -18,14 +18,4 @@ function Get(url = "") {
     return MethodDecorator(url, "GET");
 }
 exports.Get = Get;
-function BodyType(type) {
-    return (targetPrototype, prototypeKey, descriptor) => {
-        Reflect.set(descriptor.value, "bodyType", type);
-    };
-}
-exports.BodyType = BodyType;
-function Json() {
-    return BodyType("application/json");
-}
-exports.Json = Json;
 //# sourceMappingURL=methods.js.map

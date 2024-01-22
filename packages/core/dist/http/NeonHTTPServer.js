@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NeonHTTPServer = void 0;
 const NeonRequest_1 = require("./NeonRequest");
@@ -31,7 +40,6 @@ const utils_1 = require("../utils");
 const logger_1 = require("../logger");
 const NeonResponse_1 = require("./NeonResponse");
 const StatusResponse_1 = require("./StatusResponse");
-const HTTPErrorHandlers_1 = require("./HTTPErrorHandlers");
 class NeonHTTPServer {
     constructor(port, routes, api) {
         this._eventListeners = [];
@@ -40,7 +48,7 @@ class NeonHTTPServer {
         this._port = port;
         this._logger = logger_1.Logger.get("HTTP");
         this._requestLogger = logger_1.Logger.get("HTTP Request");
-        this._httpErrorHandlers = new HTTPErrorHandlers_1.HTTPErrorHandlers();
+        this._httpErrorHandler = api.GetHTTPErrorHandler();
         this._httpServer = http.createServer((req, res) => {
             let time = performance.now();
             this.processRequest(req, res);
@@ -56,12 +64,12 @@ class NeonHTTPServer {
             });
         };
         this.On("error", (request, response, err) => {
-            const res = this._httpErrorHandlers.Error(request, err);
+            const res = this._httpErrorHandler.Error(request, err);
             response.setStatus(res.status);
             sendErrorData(response, (0, utils_1.getFunctionFromResponse)(res.data)(response));
         });
         this.On("notFound", (request, response) => {
-            const res = this._httpErrorHandlers.NotFound(request);
+            const res = this._httpErrorHandler.NotFound(request);
             response.setStatus(404);
             sendErrorData(response, (0, utils_1.getFunctionFromResponse)(res)(response));
         });
@@ -88,55 +96,80 @@ class NeonHTTPServer {
         });
     }
     dispatchRequest(route, request, response) {
-        const pathParams = (0, utils_1.getPathParams)(route.path, request.getPath());
-        let args = new Array(pathParams.length);
-        route.parameters.forEach((param) => {
-            var _a, _b;
-            if (param.type == "path") {
-                args[param.index - 1] = decodeURI((_b = (_a = pathParams
-                    .find((val) => val.name == param.name)) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : "");
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const pathParams = (0, utils_1.getPathParams)(route.path, request.getPath());
+            let args = new Array(pathParams.length);
+            let canHaveBody = false;
+            const method = request.getMethod();
+            let body;
+            if (method == "POST" || method == "PUT" || method == "PATCH") {
+                canHaveBody = true;
+                const parser = this._api.GetBodyParser((_a = route.bodyType) !== null && _a !== void 0 ? _a : "");
+                if (parser) {
+                    body = yield parser(request.getStream(), request);
+                }
+                else {
+                    this._logger.warn(`HTTP Content Type body parser for "${route.bodyType}" not registered.`);
+                }
+            }
+            route.parameters.forEach((param) => {
+                var _a, _b;
+                switch (param.type) {
+                    case "path": {
+                        args[param.index - 1] = decodeURI((_b = (_a = pathParams
+                            .find((val) => val.name == param.name)) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : "");
+                        break;
+                    }
+                    case "body": {
+                        if (canHaveBody) {
+                            args[param.index - 1] = body;
+                        }
+                        break;
+                    }
+                }
+            });
+            this._requestLogger.log(`${(0, utils_1.formatRequest)(request, route)}`);
+            const sendData = (data) => {
+                response.send(data).then(() => {
+                    //this._requestLogger.log(`${`${response.getStatus()}`.padEnd(8, " ")} ${request.getPath().blue.underline}`)
+                }).catch((err) => {
+                    this._requestLogger.error("Failed to send response. See error below.");
+                    this._requestLogger.error(err);
+                });
+            };
+            try {
+                route.func.apply(this, [request, ...args]).then((funcOrObj) => {
+                    if (funcOrObj) {
+                        response.setStatus(200);
+                        sendData((0, utils_1.getFunctionFromResponse)(funcOrObj)(response));
+                    }
+                    else {
+                        this._requestLogger.warn(`Route ${(0, utils_1.formatRoute)(route)} returned undefined.`);
+                        this.Emit("error", request, response, `Route "${(0, utils_1.formatRouteNoColor)(route)}" returned undefined.`);
+                    }
+                }).catch((err) => {
+                    if (err instanceof StatusResponse_1.StatusResponse) {
+                        let data = (0, utils_1.getFunctionFromResponse)(err.data)(response);
+                        response.setStatus(err.status);
+                        sendData(data);
+                    }
+                    else {
+                        this.Emit("error", request, response, err);
+                    }
+                });
+            }
+            catch (e) {
+                if (e instanceof TypeError) {
+                    this._requestLogger.error("TypeError emitted when calling route function.");
+                    this._requestLogger.error(e);
+                    this.Emit("error", request, response, "Internal Server Failure");
+                }
+                else {
+                    this.Emit("error", request, response, e);
+                }
             }
         });
-        this._requestLogger.log(`${(0, utils_1.formatRequest)(request, route)}`);
-        const sendData = (data) => {
-            response.send(data).then(() => {
-                //this._requestLogger.log(`${`${response.getStatus()}`.padEnd(8, " ")} ${request.getPath().blue.underline}`)
-            }).catch((err) => {
-                this._requestLogger.error("Failed to send response. See error below.");
-                this._requestLogger.error(err);
-            });
-        };
-        try {
-            route.func.apply(this, [request, ...args]).then((funcOrObj) => {
-                if (funcOrObj) {
-                    response.setStatus(200);
-                    sendData((0, utils_1.getFunctionFromResponse)(funcOrObj)(response));
-                }
-                else {
-                    this._requestLogger.warn(`Route ${(0, utils_1.formatRoute)(route)} returned undefined.`);
-                    this.Emit("error", request, response, `Route "${(0, utils_1.formatRouteNoColor)(route)}" returned undefined.`);
-                }
-            }).catch((err) => {
-                if (err instanceof StatusResponse_1.StatusResponse) {
-                    let data = (0, utils_1.getFunctionFromResponse)(err.data)(response);
-                    response.setStatus(err.status);
-                    sendData(data);
-                }
-                else {
-                    this.Emit("error", request, response, err);
-                }
-            });
-        }
-        catch (e) {
-            if (e instanceof TypeError) {
-                this._requestLogger.error("TypeError emitted when calling route function.");
-                this._requestLogger.error(e);
-                this.Emit("error", request, response, "Internal Server Failure");
-            }
-            else {
-                this.Emit("error", request, response, e);
-            }
-        }
     }
     processRequest(req, res) {
         var _a, _b, _c;
@@ -147,9 +180,7 @@ class NeonHTTPServer {
             var _a;
             if (route.method.toUpperCase() != ((_a = req.method) !== null && _a !== void 0 ? _a : "").toUpperCase())
                 return false;
-            if ((0, utils_1.splitPath)(route.path).length != reqPathSplit.length)
-                return false;
-            return true;
+            return (0, utils_1.splitPath)(route.path).length == reqPathSplit.length;
         });
         moreLikely = moreLikely.filter((route) => {
             return (0, utils_1.splitPath)(route.path, caseSensitiveUrls)
@@ -167,6 +198,7 @@ class NeonHTTPServer {
             host: (_b = req.headers.host) !== null && _b !== void 0 ? _b : "",
             path: path,
             ip: (_c = req.socket.remoteAddress) !== null && _c !== void 0 ? _c : "",
+            raw: req
         });
         if (moreLikely.length == 1) {
             const route = moreLikely[0];

@@ -18,7 +18,7 @@ __exportStar(require("./NeonAPI"), exports);
 __exportStar(require("./NeonController"), exports);
 __exportStar(require("./NeonRouter"), exports);
 __exportStar(require("./utils"), exports);
-__exportStar(require("./http/HTTPErrorHandlers"), exports);
+__exportStar(require("./http/HTTPErrorHandler"), exports);
 __exportStar(require("./http/NeonResponse"), exports);
 __exportStar(require("./http/NeonHTTPServer"), exports);
 __exportStar(require("./http/NeonRequest"), exports);
@@ -28,4 +28,5 @@ __exportStar(require("./decorators/methods"), exports);
 __exportStar(require("./decorators/params"), exports);
 __exportStar(require("./logger"), exports);
 __exportStar(require("./Middleware"), exports);
+__exportStar(require("./decorators/bodyType"), exports);
 //# sourceMappingURL=index.js.map
