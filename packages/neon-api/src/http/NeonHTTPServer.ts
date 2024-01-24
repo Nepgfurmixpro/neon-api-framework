@@ -34,7 +34,11 @@ export class NeonHTTPServer {
     this._httpErrorHandler = api.GetHTTPErrorHandler()
     this._httpServer = http.createServer((req, res) => {
       let time = performance.now()
-      this.processRequest(req, res)
+      try {
+        this.processRequest(req, res)
+      } catch (e) {
+        console.log(e)
+      }
       let resTime = Math.round(performance.now() - time)
       this._logger.debug(`Response Took: ${resTime < 100 ? `${resTime}ms`.green : `${resTime}ms`.red}`)
     }).on("listening", () => {

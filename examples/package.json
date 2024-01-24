@@ -2,7 +2,8 @@
   "name": "examples",
   "version": "1.0.0",
   "dependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "neon-api": "./packages/neon-api"
   },
   "scripts": {
     "build": "tsc",
