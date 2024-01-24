@@ -21,59 +21,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("@neon-api/core");
-let Users = class Users extends core_1.NeonController {
-    CreateUser(req, id, name) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (id != "1") {
-                throw new core_1.StatusResponse(400, {
-                    message: "ID must be 1",
-                    code: 1000
-                });
-            }
-            return {
-                name, id
-            };
+exports.Users = void 0;
+const neon_api_1 = require("neon-api");
+class TestRes extends neon_api_1.StatusResponse {
+    constructor() {
+        super(400, {
+            test: "test"
         });
     }
-    GetUser(req) {
+}
+let Users = class Users extends neon_api_1.NeonController {
+    CreateNewUser(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return {
-                name: "Gavin",
-                gay: true
-            };
-        });
-    }
-    GetAllUsers(req) {
-        return __awaiter(this, void 0, void 0, function* () {
+            return (0, neon_api_1.headers)({
+                "X-Test-Header": "Testing"
+            }, {
+                data: "value"
+            });
         });
     }
 };
+exports.Users = Users;
 __decorate([
-    (0, core_1.Get)("/<id>/<name>"),
-    (0, core_1.Json)(),
-    __param(1, (0, core_1.Path)("id")),
-    __param(2, (0, core_1.Path)("name")),
+    (0, neon_api_1.Post)("/create"),
+    (0, neon_api_1.Json)(),
+    __param(1, neon_api_1.Body),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [core_1.NeonRequest, String, String]),
+    __metadata("design:paramtypes", [neon_api_1.NeonRequest, Object]),
     __metadata("design:returntype", Promise)
-], Users.prototype, "CreateUser", null);
-__decorate([
-    (0, core_1.Get)("/test/shouldBePickedFirst"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [core_1.NeonRequest]),
-    __metadata("design:returntype", Promise)
-], Users.prototype, "GetUser", null);
-__decorate([
-    (0, core_1.Get)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [core_1.NeonRequest]),
-    __metadata("design:returntype", Promise)
-], Users.prototype, "GetAllUsers", null);
-Users = __decorate([
-    (0, core_1.Controller)("/users")
+], Users.prototype, "CreateNewUser", null);
+exports.Users = Users = __decorate([
+    (0, neon_api_1.Controller)("/users")
 ], Users);
-core_1.NeonFramework.AddRoutes("/api/v1", [
+neon_api_1.NeonFramework.AddRoutes("/api/v1", [
     Users
 ]);
-core_1.NeonFramework.Listen();
+neon_api_1.NeonFramework.RegisterContentTypes(neon_api_1.ContentTypes.Json, neon_api_1.ContentTypes.UrlEncoded);
+neon_api_1.NeonFramework.Listen();
