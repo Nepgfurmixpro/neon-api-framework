@@ -6,8 +6,7 @@ import {
   NeonRequest,
   Path,
   Post, UrlEncoded
-} from "@neon-api/core"
-import {headers} from "neon-api";
+} from "neon-api"
 
 type TestRequest = {
   item?: string
