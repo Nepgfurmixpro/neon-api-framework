@@ -1,27 +1,30 @@
 import {
   Body, ContentTypes,
-  Controller, html,
+  Controller, Json,
   NeonController,
   NeonFramework,
   NeonRequest,
   Path,
-  Post, UrlEncoded
+  Post, StatusResponse, UrlEncoded
 } from "neon-api"
 
 type TestRequest = {
   item?: string
 }
 
-@Controller("/users")
-class Users extends NeonController {
-  @Post("/<id>/<name>")
-  @UrlEncoded()
-  async CreateUser(
-    req: NeonRequest,
-    @Path("id") id: string,
-    @Path("name") name: string,
-    @Body data: TestRequest) {
+class TestRes extends StatusResponse {
+  constructor() {
+    super(400, {
+      test: "test"
+    });
+  }
+}
 
+@Controller("/users")
+export class Users extends NeonController {
+  @Post("/create")
+  @Json()
+  CreateNewUser(req: NeonRequest, @Body data: TestRequest) {
 
     return headers({
       "X-Test-Header": "Testing"

@@ -46,7 +46,13 @@ export function basicContentType(type: string, cb: (str: string) => any) {
 }
 
 export const ContentTypes: Record<"Json" | "UrlEncoded", ContentTypeBuilder> = {
-  Json: basicContentType("application/json", JSON.parse),
+  Json: basicContentType("application/json", (str) => {
+    try {
+      return JSON.parse(str ?? "")
+    } catch (e) {
+      return {}
+    }
+  }),
   UrlEncoded: basicContentType("application/x-www-form-urlencoded", (str) => {
     const params = new URLSearchParams(str)
     const out: {[key: string]: string} = {}

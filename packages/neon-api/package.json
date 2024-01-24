@@ -1,11 +1,11 @@
 {
-  "name": "@neon-api/core",
+  "name": "neon-api",
   "files": [
     "dist"
   ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dependencies": {
     "@types/colors": "^1.2.1",
     "@types/node": "^20.11.5",
@@ -21,6 +21,7 @@
   },
   "scripts": {
     "build": "tsc -p .",
-    "start": "yarn build -- -w"
+    "start": "yarn build -- -w",
+    "prepare": "yarn build"
   }
 }
