@@ -1,12 +1,13 @@
 import {
   Body, ContentTypes,
-  Controller,
+  Controller, html,
   NeonController,
   NeonFramework,
   NeonRequest,
   Path,
   Post, UrlEncoded
 } from "@neon-api/core"
+import {headers} from "neon-api";
 
 type TestRequest = {
   item?: string
@@ -22,11 +23,12 @@ class Users extends NeonController {
     @Path("name") name: string,
     @Body data: TestRequest) {
 
-    console.log(data.item)
 
-    return {
-      name, id
-    }
+    return headers({
+      "X-Test-Header": "Testing"
+    }, {
+      data: "value"
+    })
   }
 }
 

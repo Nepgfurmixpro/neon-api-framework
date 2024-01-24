@@ -1,7 +1,7 @@
 import {Route} from "./NeonController";
 import colors from "colors";
 import { NeonRequest, HTTPMethod} from "./http/NeonRequest";
-import {json, ResponseFormatterFunction} from "./http/NeonResponse";
+import {json, ResponseFormatterFunction} from "./http/ResponseData";
 
 function normalize(strArray: string[]) {
   const resultArray = [];

@@ -1,33 +1,5 @@
 import * as http from "http";
 
-type ResponseFormatterFunction = (res: NeonResponse) => any
-
-export type {
-  ResponseFormatterFunction
-}
-
-export function json(data: any): ResponseFormatterFunction {
-  return (res) => {
-    res.setContentType("application/json")
-    return JSON.stringify(data)
-  }
-}
-
-export function url(data: Record<string, any>): ResponseFormatterFunction {
-  return (res) => {
-    res.setContentType("application/x-www-form-urlencoded")
-    return new URLSearchParams(data)
-      .toString()
-  }
-}
-
-export function html(data: string): ResponseFormatterFunction {
-  return (res) => {
-    res.setContentType("text/html")
-    return data
-  }
-}
-
 export class NeonResponse {
   constructor(res: http.ServerResponse) {
     this._res = res;
