@@ -18,10 +18,12 @@ function MethodDecorator(url: string, method: HTTPMethod) {
   }
 }
 
-export function Post(url: string = "") {
-  return MethodDecorator(url, "POST")
-}
+const Post = (url: string = "") => MethodDecorator(url, "POST")
+const Put = (url: string = "") => MethodDecorator(url, "PUT")
+const Patch = (url: string = "") => MethodDecorator(url, "PATCH")
+const Get = (url: string = "") => MethodDecorator(url, "GET")
+const Delete = (url: string = "") => MethodDecorator(url, "DELETE")
 
-export function Get(url: string = "") {
-  return MethodDecorator(url, "GET")
+export {
+  Post, Put, Patch, Get, Delete
 }
