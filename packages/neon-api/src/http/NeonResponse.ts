@@ -18,6 +18,7 @@ export class NeonResponse {
   }
 
   end() {
+    this._ended = true
     this._res.end()
   }
 
@@ -35,5 +36,14 @@ export class NeonResponse {
     return this._res.statusCode
   }
 
+  isOpen() {
+    return !this._res.closed
+  }
+
+  isEnded() {
+    return this._ended
+  }
+
   private readonly _res: http.ServerResponse
+  private _ended = false
 }

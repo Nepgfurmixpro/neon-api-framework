@@ -20,4 +20,8 @@ export function Path(name: string) {
   return addParam(name, "path")
 }
 
+export function Query(name: string) {
+  return addParam(name, "query")
+}
+
 export const Body = addParam("", "body")

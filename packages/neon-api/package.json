@@ -1,22 +1,20 @@
 {
-  "name": "neon-api",
+  "name": "neon-api-framework",
   "files": [
     "dist"
   ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "version": "1.0.3",
+  "version": "1.0.9",
   "dependencies": {
-    "@types/colors": "^1.2.1",
-    "@types/node": "^20.11.5",
-    "@types/uuid": "^9.0.7",
     "colors": "^1.4.0",
     "reflect-metadata": "^0.2.1",
-    "typescript": "^5.3.3",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.11.2",
+    "@types/colors": "^1.2.1",
+    "@types/node": "^20.11.5",
+    "@types/uuid": "^9.0.7",
     "typescript": "^5.3.3"
   },
   "scripts": {

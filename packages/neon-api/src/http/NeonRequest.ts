@@ -42,6 +42,14 @@ export class NeonRequest {
     return this._raw
   }
 
+  isOpen(): boolean {
+    return !this._raw.closed
+  }
+
+  getHeader(name: string) {
+    return this._raw.headers[name]
+  }
+
   private _headers: NeonHeaders
   private readonly _method: HTTPMethod
   private _host: string

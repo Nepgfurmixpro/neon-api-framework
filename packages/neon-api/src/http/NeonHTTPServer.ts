@@ -40,7 +40,7 @@ export class NeonHTTPServer {
         console.log(e)
       }
       let resTime = Math.round(performance.now() - time)
-      this._logger.debug(`Response Took: ${resTime < 100 ? `${resTime}ms`.green : `${resTime}ms`.red}`)
+      this._logger.debug(`Processing Took: ${resTime < 100 ? `${resTime}ms`.green : `${resTime}ms`.red}`)
     }).on("listening", () => {
       this.Emit("ready")
     })
@@ -104,6 +104,14 @@ export class NeonHTTPServer {
         this._logger.warn(`HTTP Content Type body parser for "${route.bodyType}" not registered.`)
       }
     }
+    const urlQuery = new URLSearchParams(request.getPath())
+    let cancel = false
+    for (const middleware of route.middleware) {
+      if (cancel) continue;
+      args[middleware.paramIdx-1] = await middleware.middleware.handle(request, response)
+      if (response.isEnded()) cancel = true
+    }
+    if (cancel) return;
     route.parameters.forEach((param) => {
       switch (param.type) {
         case "path": {
@@ -115,6 +123,10 @@ export class NeonHTTPServer {
           if (canHaveBody) {
             args[param.index-1] = body
           }
+          break;
+        }
+        case "query": {
+          args[param.index-1] = urlQuery.get(param.name)
           break;
         }
       }
@@ -129,6 +141,7 @@ export class NeonHTTPServer {
       })
     }
     try {
+      const before = performance.now()
       route.func.apply(this, [request, ...args]).then((funcOrObj) => {
         if (funcOrObj) {
           response.setStatus(200)
@@ -137,6 +150,8 @@ export class NeonHTTPServer {
           this._requestLogger.warn(`Route ${formatRoute(route)} returned undefined.`)
           this.Emit("error", request, response, `Route "${formatRouteNoColor(route)}" returned undefined.`)
         }
+        let resTime = Math.round(performance.now() - before)
+        this._requestLogger.debug(`Response Took: ${resTime < 100 ? `${resTime}ms`.green : `${resTime}ms`.red}`)
       }).catch((err: StatusResponse | any) => {
         if (err instanceof StatusResponse) {
           let data = getFunctionFromResponse(err.data)(response)

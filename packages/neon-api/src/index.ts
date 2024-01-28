@@ -12,5 +12,6 @@ export * from "./decorators/controller"
 export * from "./decorators/methods"
 export * from "./decorators/params"
 export * from "./logger"
-export * from "./Middleware"
+export * from "./NeonMiddleware"
 export * from "./decorators/bodyType";
+export * from "./decorators/middleware"

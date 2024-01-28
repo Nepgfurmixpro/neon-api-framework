@@ -1,11 +1,17 @@
 import {MethodFunction} from "./decorators/methods";
 import { urlJoin } from "./utils";
 import {HTTPMethod} from "./http/NeonRequest";
+import {NeonMiddleware} from "./NeonMiddleware";
 
 export type RouteParam = {
   index: number,
   name: string,
-  type: "body" | "path" | "query"
+  type: "body" | "path" | "query" | "middleware"
+}
+
+export type RouteMiddleware = {
+  paramIdx: number,
+  middleware: NeonMiddleware
 }
 
 export type Route = {
@@ -13,7 +19,8 @@ export type Route = {
   method: HTTPMethod,
   func: MethodFunction,
   path: string,
-  bodyType?: string
+  bodyType?: string,
+  middleware: RouteMiddleware[]
 }
 
 export class NeonController {
@@ -31,7 +38,8 @@ export class NeonController {
           path: urlJoin(this._basePath, property.route.url ?? "/"),
           parameters: property.params ?? [],
           func: property,
-          bodyType: property.bodyType
+          bodyType: property.bodyType,
+          middleware: property.middleware ?? []
         })
       }
     }

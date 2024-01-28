@@ -22,18 +22,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Users = void 0;
-const neon_api_1 = require("neon-api");
-class TestRes extends neon_api_1.StatusResponse {
-    constructor() {
-        super(400, {
-            test: "test"
-        });
+const neon_api_framework_1 = require("neon-api-framework");
+class TestMiddleware extends neon_api_framework_1.NeonMiddleware {
+    handle(request, response) {
+        console.log("closing");
+        response.end();
     }
 }
-let Users = class Users extends neon_api_1.NeonController {
-    CreateNewUser(req, data) {
+let Users = class Users extends neon_api_framework_1.NeonController {
+    CreateNewUser(req, testData, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (0, neon_api_1.headers)({
+            console.log(testData);
+            return (0, neon_api_framework_1.headers)({
                 "X-Test-Header": "Testing"
             }, {
                 data: "value"
@@ -43,18 +43,19 @@ let Users = class Users extends neon_api_1.NeonController {
 };
 exports.Users = Users;
 __decorate([
-    (0, neon_api_1.Post)("/create"),
-    (0, neon_api_1.Json)(),
-    __param(1, neon_api_1.Body),
+    (0, neon_api_framework_1.Post)("/create"),
+    (0, neon_api_framework_1.Json)(),
+    __param(1, (0, neon_api_framework_1.Middleware)(TestMiddleware)),
+    __param(2, neon_api_framework_1.Body),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [neon_api_1.NeonRequest, Object]),
+    __metadata("design:paramtypes", [neon_api_framework_1.NeonRequest, Object, Object]),
     __metadata("design:returntype", Promise)
 ], Users.prototype, "CreateNewUser", null);
 exports.Users = Users = __decorate([
-    (0, neon_api_1.Controller)("/users")
+    (0, neon_api_framework_1.Controller)("/users")
 ], Users);
-neon_api_1.NeonFramework.AddRoutes("/api/v1", [
+neon_api_framework_1.NeonFramework.AddRoutes("/api/v1", [
     Users
 ]);
-neon_api_1.NeonFramework.RegisterContentTypes(neon_api_1.ContentTypes.Json, neon_api_1.ContentTypes.UrlEncoded);
-neon_api_1.NeonFramework.Listen();
+neon_api_framework_1.NeonFramework.RegisterContentTypes(neon_api_framework_1.ContentTypes.Json, neon_api_framework_1.ContentTypes.UrlEncoded);
+neon_api_framework_1.NeonFramework.Listen();
