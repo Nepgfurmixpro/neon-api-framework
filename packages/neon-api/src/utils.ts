@@ -95,8 +95,10 @@ export function formatRoutes(routes: Route[], color: boolean = true) {
 
 const MethodColors: Record<string, colors.Color> = {
   "post": colors.blue,
+  "patch": colors.magenta,
+  "put": colors.cyan,
   "get": colors.green,
-  "delete": colors.red
+  "delete": colors.red,
 }
 
 export function methodColor(method: string) {

@@ -104,7 +104,6 @@ export class NeonHTTPServer {
         this._logger.warn(`HTTP Content Type body parser for "${route.bodyType}" not registered.`)
       }
     }
-    const urlQuery = new URLSearchParams(request.getPath())
     let cancel = false
     for (const middleware of route.middleware) {
       if (cancel) continue;
@@ -112,6 +111,7 @@ export class NeonHTTPServer {
       if (response.isEnded()) cancel = true
     }
     if (cancel) return;
+    const urlQuery = request.getQueryParams()
     route.parameters.forEach((param) => {
       switch (param.type) {
         case "path": {

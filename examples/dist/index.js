@@ -23,16 +23,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Users = void 0;
 const neon_api_framework_1 = require("neon-api-framework");
-class TestMiddleware extends neon_api_framework_1.NeonMiddleware {
-    handle(request, response) {
-        console.log("closing");
-        response.end();
-    }
-}
 let Users = class Users extends neon_api_framework_1.NeonController {
-    CreateNewUser(req, testData, data) {
+    CreateNewUser(req, test, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(testData);
+            console.log(test);
             return (0, neon_api_framework_1.headers)({
                 "X-Test-Header": "Testing"
             }, {
@@ -45,10 +39,10 @@ exports.Users = Users;
 __decorate([
     (0, neon_api_framework_1.Post)("/create"),
     (0, neon_api_framework_1.Json)(),
-    __param(1, (0, neon_api_framework_1.Middleware)(TestMiddleware)),
+    __param(1, (0, neon_api_framework_1.Query)("test")),
     __param(2, neon_api_framework_1.Body),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [neon_api_framework_1.NeonRequest, Object, Object]),
+    __metadata("design:paramtypes", [neon_api_framework_1.NeonRequest, String, Object]),
     __metadata("design:returntype", Promise)
 ], Users.prototype, "CreateNewUser", null);
 exports.Users = Users = __decorate([

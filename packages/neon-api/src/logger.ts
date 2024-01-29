@@ -10,6 +10,7 @@ const LogLevel: Record<string, (str: string) => string> = {
 export class Logger {
   protected constructor(name: string) {
     this._name = name
+    this._debug = true
   }
 
   private _print(level: string, ...args: any[]) {
@@ -18,6 +19,10 @@ export class Logger {
       dateStyle: "medium",
       timeStyle: "long"
     })}] ${LogLevel[level](`[${this._name} / ${level}]`)} ->`, ...args)
+  }
+
+  debugDisabled(val: boolean) {
+    this._debug = !val
   }
 
   log(...args: string[]) {
@@ -29,7 +34,7 @@ export class Logger {
   }
 
   debug(...args: any[]) {
-    this._print("Debug", ...args)
+    if (this._debug) this._print("Debug", ...args)
   }
 
   warn(...args: any[]) {
@@ -37,6 +42,7 @@ export class Logger {
   }
 
   private readonly _name: string
+  private _debug: boolean
 
   static get(name: string) {
     return new Logger(name)

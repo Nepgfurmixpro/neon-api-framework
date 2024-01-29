@@ -50,6 +50,10 @@ export class NeonRequest {
     return this._raw.headers[name]
   }
 
+  getQueryParams() {
+    return new URL(this._raw.url ?? "", LOCAL_HOST).searchParams
+  }
+
   private _headers: NeonHeaders
   private readonly _method: HTTPMethod
   private _host: string

@@ -4,26 +4,19 @@ import {
   NeonController,
   NeonFramework, NeonMiddleware,
   NeonRequest, NeonResponse,
-  Post
+  Post, Query
 } from "neon-api-framework"
 
 type TestRequest = {
   item?: string
 }
 
-class TestMiddleware extends NeonMiddleware {
-  override handle(request: NeonRequest, response: NeonResponse): any {
-    console.log("closing")
-    response.end()
-  }
-}
-
 @Controller("/users")
 export class Users extends NeonController {
   @Post("/create")
   @Json()
-  async CreateNewUser(req: NeonRequest, @Middleware(TestMiddleware) testData: any, @Body data: TestRequest) {
-    console.log(testData)
+  async CreateNewUser(req: NeonRequest, @Query("test") test: string, @Body data: TestRequest) {
+    console.log(test)
     return headers({
       "X-Test-Header": "Testing"
     }, {

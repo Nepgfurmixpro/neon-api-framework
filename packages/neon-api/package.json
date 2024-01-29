@@ -5,7 +5,7 @@
   ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "version": "1.0.9",
+  "version": "1.1.5",
   "dependencies": {
     "colors": "^1.4.0",
     "reflect-metadata": "^0.2.1",
@@ -24,6 +24,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Nepgfurmixpro/neon-api-framework"
+    "url": "git+https://github.com/Nepgfurmixpro/neon-api-framework.git"
   }
 }
