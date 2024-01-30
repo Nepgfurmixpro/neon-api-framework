@@ -6,6 +6,7 @@ import {NeonHTTPServer} from "./http/NeonHTTPServer";
 import {NeonRequest} from "./http/NeonRequest";
 import stream from "stream"
 import {HTTPErrorHandler} from "./http/HTTPErrorHandler";
+import {NeonMiddleware} from "./NeonMiddleware";
 
 const DEFAULT_PORT = 3000
 
@@ -24,6 +25,7 @@ export class NeonAPI {
   constructor() {
     this._logger = Logger.get("NeonFramework")
     this._routers = [];
+    this._middleware = []
     this._bodyParsers = {}
 
     this._apiOptions = {
@@ -71,6 +73,14 @@ export class NeonAPI {
     this.AddRouter(Array.isArray(route) ? route : [route])
   }
 
+  AddMiddleware(...middleware: NeonMiddleware[]) {
+    this._middleware.push(...middleware)
+  }
+
+  GetMiddleware() {
+    return this._middleware
+  }
+
   GetRouters(): NeonRouter[] {
     return this._routers
   }
@@ -99,6 +109,7 @@ export class NeonAPI {
   private _bodyParsers: Record<string, BodyParserFunction>
   private _server: NeonHTTPServer | undefined;
   private _httpErrorHandler: HTTPErrorHandler | undefined
+  private _middleware: NeonMiddleware[]
 }
 
 export const NeonFramework = new NeonAPI();

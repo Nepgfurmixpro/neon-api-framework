@@ -1,20 +1,15 @@
 {
-  "name": "neon-api-framework",
+  "name": "@neon-api-framework/cors",
   "files": [
     "dist"
   ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "version": "1.2.2",
+  "version": "1.0.9",
   "dependencies": {
-    "colors": "^1.4.0",
-    "reflect-metadata": "^0.2.1",
-    "uuid": "^9.0.1"
+    "neon-api-framework": "^1.2.0"
   },
   "devDependencies": {
-    "@types/colors": "^1.2.1",
-    "@types/node": "^20.11.5",
-    "@types/uuid": "^9.0.7",
     "typescript": "^5.3.3"
   },
   "scripts": {

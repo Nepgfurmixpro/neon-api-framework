@@ -23,6 +23,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Users = void 0;
 const neon_api_framework_1 = require("neon-api-framework");
+const cors_1 = require("@neon-api-framework/cors");
 let Users = class Users extends neon_api_framework_1.NeonController {
     CreateNewUser(req, test, data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -52,4 +53,7 @@ neon_api_framework_1.NeonFramework.AddRoutes("/api/v1", [
     Users
 ]);
 neon_api_framework_1.NeonFramework.RegisterContentTypes(neon_api_framework_1.ContentTypes.Json, neon_api_framework_1.ContentTypes.UrlEncoded);
+neon_api_framework_1.NeonFramework.AddMiddleware(new cors_1.NeonCors({
+    AllowOrigin: "*",
+}));
 neon_api_framework_1.NeonFramework.Listen();

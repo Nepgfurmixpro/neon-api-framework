@@ -172,7 +172,7 @@ export class NeonHTTPServer {
     }
   }
 
-  private processRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+  private async processRequest(req: http.IncomingMessage, res: http.ServerResponse) {
     const caseSensitiveUrls = this._api.GetOption("CaseSensitive")
     const path = new URL(req.url ?? "/", LOCAL_HOST).pathname
     const reqPathSplit = splitPath(path, caseSensitiveUrls)
@@ -199,9 +199,14 @@ export class NeonHTTPServer {
       ip: req.socket.remoteAddress ?? "",
       raw: req
     })
+    const _res = new NeonResponse(res)
+    for (const middleware of this._api.GetMiddleware()) {
+      await middleware.handle(request, _res)
+      if (_res.isEnded()) return;
+    }
     if (moreLikely.length == 1) {
       const route = moreLikely[0]
-      this.dispatchRequest(route, request, new NeonResponse(res))
+      await this.dispatchRequest(route, request, _res)
     } else {
       if (moreLikely.length > 1) {
         this._requestLogger.warn("Multiple routes found")

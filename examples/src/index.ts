@@ -6,6 +6,7 @@ import {
   NeonRequest, NeonResponse,
   Post, Query
 } from "neon-api-framework"
+import {NeonCors} from "@neon-api-framework/cors";
 
 type TestRequest = {
   item?: string
@@ -33,5 +34,9 @@ NeonFramework.RegisterContentTypes(
   ContentTypes.Json,
   ContentTypes.UrlEncoded
 )
+
+NeonFramework.AddMiddleware(new NeonCors({
+  AllowOrigin: "*",
+}))
 
 NeonFramework.Listen()

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "dependencies": {
     "typescript": "^5.3.3",
-    "neon-api-framework": "./packages/neon-api"
+    "neon-api-framework": "./packages/neon-api",
+    "@neon-api-framework/cors": "./packages/cors"
   },
   "scripts": {
     "build": "tsc",

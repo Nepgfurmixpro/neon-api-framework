@@ -14,7 +14,15 @@ export class NeonResponse {
   }
 
   setHeader(name: string, value: string) {
-    this._res.setHeader(name, value)
+    if (this._res.hasHeader(name)) {
+      let previousHeaders = this._res.getHeader(name)
+      if (typeof previousHeaders == "string") {
+        previousHeaders = [previousHeaders]
+      }
+      this._res.setHeader(name, [...previousHeaders as string[], value])
+    } else {
+      this._res.setHeader(name, value)
+    }
   }
 
   end() {

@@ -99,10 +99,16 @@ const MethodColors: Record<string, colors.Color> = {
   "put": colors.cyan,
   "get": colors.green,
   "delete": colors.red,
+  "options": colors.yellow,
+  "connect": colors.gray
 }
 
 export function methodColor(method: string) {
-  return MethodColors[method.toLowerCase().trim()](method)
+  try {
+    return MethodColors[method.toLowerCase().trim()](method)
+  } catch (e) {
+    return method
+  }
 }
 
 export function formatRequest(req: NeonRequest, route?: Route) {

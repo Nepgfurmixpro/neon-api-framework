@@ -47,7 +47,7 @@ export class NeonRequest {
   }
 
   getHeader(name: string) {
-    return this._raw.headers[name]
+    return this._raw.headers[name.toLowerCase()]
   }
 
   getQueryParams() {
