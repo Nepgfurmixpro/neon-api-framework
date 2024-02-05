@@ -5,12 +5,10 @@
   ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
-  "version": "1.0.9",
-  "dependencies": {
-    "neon-api-framework": "^1.2.0"
-  },
+  "version": "1.1.0",
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "neon-api-framework": "^1.2.0"
   },
   "scripts": {
     "build": "tsc -p .",
