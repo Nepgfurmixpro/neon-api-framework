@@ -178,17 +178,15 @@ export class NeonHTTPServer {
     const reqPathSplit = splitPath(path, caseSensitiveUrls)
     let moreLikely = this._routes.filter((route) => {
       if (route.method.toUpperCase() != (req.method ?? "").toUpperCase()) return false
-      return splitPath(route.path).length == reqPathSplit.length;
+      return splitPath(route.path).length == reqPathSplit.length || path.match(route.path.replace(/\*/g, "(.*)"));
     })
     moreLikely = moreLikely.filter((route) => {
-      return splitPath(route.path, caseSensitiveUrls)
-        .every((val, i) =>
-          val == reqPathSplit[i] || PATH_PARAM_REGEX.test(val))
+      return path.match(route.path.replace(/\*|<.*>/g, "(.*)"))
     })
     if (moreLikely.length > 1) {
       moreLikely = moreLikely.filter((route) => {
         return splitPath(route.path, caseSensitiveUrls)
-          .every((val, i) => val == reqPathSplit[i])
+          .every((val, i) => val == reqPathSplit[i] || PATH_PARAM_REGEX.test(val))
       })
     }
     const request = new NeonRequest({

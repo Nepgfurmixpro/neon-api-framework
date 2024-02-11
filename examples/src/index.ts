@@ -4,7 +4,7 @@ import {
   NeonController,
   NeonFramework, NeonMiddleware,
   NeonRequest, NeonResponse,
-  Post, Query
+  Post, Query, Path
 } from "neon-api-framework"
 import {NeonCors} from "@neon-api-framework/cors";
 
@@ -14,15 +14,20 @@ type TestRequest = {
 
 @Controller("/users")
 export class Users extends NeonController {
-  @Post("/create")
+  @Post("/<id>")
   @Json()
-  async CreateNewUser(req: NeonRequest, @Query("test") test: string, @Body data: TestRequest) {
+  async CreateNewUser(req: NeonRequest, @Path("id") test: string, @Body data: TestRequest) {
     console.log(test)
     return headers({
       "X-Test-Header": "Testing"
     }, {
       data: "value"
     })
+  }
+
+  @Post("*/test")
+  async NotFound(req: NeonRequest) {
+    return "urmom"
   }
 }
 
@@ -34,9 +39,5 @@ NeonFramework.RegisterContentTypes(
   ContentTypes.Json,
   ContentTypes.UrlEncoded
 )
-
-NeonFramework.AddMiddleware(new NeonCors({
-  AllowOrigin: "*",
-}))
 
 NeonFramework.Listen()

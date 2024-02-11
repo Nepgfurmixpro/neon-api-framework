@@ -39,3 +39,12 @@ export function headers(headers: NeonHeaders, data: ResponseFormatterFunction | 
     return func(res)
   }
 }
+
+export function status(code: number, data: ResponseFormatterFunction | object): ResponseFormatterFunction {
+  const func = getFunctionFromResponse(data)
+  return (res) => {
+    res.setStatus(code)
+
+    return func(res)
+  }
+}
